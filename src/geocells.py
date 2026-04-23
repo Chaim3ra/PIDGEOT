@@ -80,10 +80,12 @@ def build_semantic_geocells(
         parent_map: dict[tuple, list[int]] = {}
         for key, idxs in idx_map.items():
             if len(idxs) >= min_samples:
-                parent_map[key] = idxs
-                continue
-            parent_key = key[:level] + (UNKNOWN,) * (len(key) - level)
-            parent_map.setdefault(parent_key, []).extend(idxs)
+                # Big group: keep at this admin level. Use setdefault+extend so we don't
+                # clobber indices from small groups that aggregated into this same key.
+                parent_map.setdefault(key, []).extend(idxs)
+            else:
+                parent_key = key[:level] + (UNKNOWN,) * (len(key) - level)
+                parent_map.setdefault(parent_key, []).extend(idxs)
         return parent_map
 
     merged = merge_parents(group_to_indices, level=2)
