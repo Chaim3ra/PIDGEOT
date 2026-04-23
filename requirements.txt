@@ -1,0 +1,15 @@
+torch>=2.2
+torchvision>=0.17
+transformers>=4.40
+huggingface_hub>=0.23
+Pillow>=10.2
+numpy>=1.26
+pandas>=2.2
+pyarrow>=15.0
+scikit-learn>=1.4
+tqdm>=4.66
+matplotlib>=3.8
+folium>=0.16
+gradio>=4.26
+pyyaml>=6.0
+pycountry-convert>=0.7

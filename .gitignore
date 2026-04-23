@@ -1,0 +1,35 @@
+# downloaded datasets and artifacts
+data/
+*.npy
+*.npz
+*.pt
+*.parquet
+*.pkl
+*.zip
+*.tar
+*.tar.gz
+
+# images (allow hand-written assets under docs/)
+*.jpg
+*.jpeg
+*.png
+*.webp
+!docs/*.png
+!docs/*.jpg
+
+# python / uv
+__pycache__/
+*.pyc
+*.pyo
+.venv/
+.env
+.ipynb_checkpoints/
+.mypy_cache/
+.ruff_cache/
+.pytest_cache/
+
+# editors / OS
+.vscode/
+.idea/
+.DS_Store
+Thumbs.db
