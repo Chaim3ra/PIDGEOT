@@ -63,6 +63,30 @@ class InferenceCfg:
 
 
 @dataclass
+class OCRCfg:
+    enabled: bool
+    min_conf: float
+    min_chars: int
+    languages: list
+    cache_path: str
+
+
+@dataclass
+class ColorHistCfg:
+    enabled: bool
+    bins: list
+    grid: int
+    path: str
+
+
+@dataclass
+class RerankCfg:
+    alpha: float
+    beta: float
+    gamma: float
+
+
+@dataclass
 class Config:
     seed: int
     model: ModelCfg
@@ -72,6 +96,9 @@ class Config:
     classifier: ClassifierCfg
     prototypes: PrototypesCfg
     inference: InferenceCfg
+    ocr: OCRCfg
+    color_hist: ColorHistCfg
+    rerank: RerankCfg
 
 
 DEFAULT_CONFIG_PATH = Path(__file__).resolve().parent.parent / "config.yaml"
@@ -90,4 +117,7 @@ def load_config(path: str | Path | None = None) -> Config:
         classifier=ClassifierCfg(**raw["classifier"]),
         prototypes=PrototypesCfg(**raw["prototypes"]),
         inference=InferenceCfg(**raw["inference"]),
+        ocr=OCRCfg(**raw["ocr"]),
+        color_hist=ColorHistCfg(**raw["color_hist"]),
+        rerank=RerankCfg(**raw["rerank"]),
     )

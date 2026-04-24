@@ -1,10 +1,8 @@
 from __future__ import annotations
 
-from pathlib import Path
 from typing import Iterable
 
 import numpy as np
-import pandas as pd
 
 
 LAT_COL_CANDIDATES = ("latitude", "lat")
@@ -78,8 +76,3 @@ def train_val_split_stratified(
     train_idx = np.flatnonzero(~is_val)
     val_idx = np.flatnonzero(is_val)
     return train_idx, val_idx
-
-
-def load_metadata_csv(path: str | Path) -> pd.DataFrame:
-    df = pd.read_csv(path)
-    return df

@@ -13,3 +13,5 @@ folium>=0.16
 gradio>=4.26
 pyyaml>=6.0
 pycountry-convert>=0.7
+easyocr>=1.7
+opencv-python-headless>=4.9

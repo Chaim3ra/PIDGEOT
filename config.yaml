@@ -1,43 +1,62 @@
 seed: 42
-
 model:
   name: geolocal/StreetCLIP
   embed_dim: 768
   image_size: 336
-
 data:
   subset_dir: data/osv5m_subset
   metadata_csv: data/osv5m_subset/metadata.csv
   images_dir: data/osv5m_subset/images
   n_samples: 50000
-  val_fraction: 0.10
-
+  val_fraction: 0.1
 geocells:
   path: data/geocells/cells.pkl
   min_samples_per_cell: 30
   target_num_cells: 300
-
 embeddings:
   path: data/embeddings.npy
   meta_path: data/meta.parquet
   batch_size: 64
   batch_size_cpu: 16
-
 classifier:
   path: data/classifier.pt
   hidden_dim: 512
   dropout: 0.1
-  lr: 1.0e-3
-  weight_decay: 1.0e-4
+  lr: 0.001
+  weight_decay: 0.0001
   batch_size: 512
   epochs: 20
   tau_km: 75.0
-
 prototypes:
   path: data/prototypes.npz
   max_k_per_cell: 10
   samples_per_prototype: 50
-
 inference:
   top_cells: 5
   top_k_candidates: 5
+ocr:
+  enabled: true
+  min_conf: 0.4
+  min_chars: 3
+  languages:
+  - en
+  - ru
+  - ar
+  - hi
+  - th
+  - ja
+  - ko
+  - ch_sim
+  cache_path: data/ocr_cache.parquet
+color_hist:
+  enabled: true
+  bins:
+  - 8
+  - 8
+  - 8
+  grid: 3
+  path: data/image_histograms.npy
+rerank:
+  alpha: 1.0
+  beta: 0.0
+  gamma: 0.2

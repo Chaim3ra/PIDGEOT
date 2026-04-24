@@ -27,6 +27,7 @@ def main() -> None:
     meta_path = smoke_dir / "meta.parquet"
     clf_path = smoke_dir / "classifier.pt"
     protos_path = smoke_dir / "prototypes.npz"
+    hist_path = smoke_dir / "image_histograms.npy"
 
     python = sys.executable
 
@@ -34,13 +35,18 @@ def main() -> None:
     run([python, "scripts/build_geocells.py", "--meta", str(subset / "metadata.csv"), "--out", str(cells_path), "--min-samples", "10"])
     run([python, "scripts/embed_dataset.py", "--meta", str(subset / "metadata.csv"), "--cells", str(cells_path), "--out-emb", str(emb_path), "--out-meta", str(meta_path)])
     run([python, "scripts/train_classifier.py", "--emb", str(emb_path), "--meta", str(meta_path), "--cells", str(cells_path), "--out", str(clf_path), "--curves", str(smoke_dir / "curves.png"), "--epochs", "1"])
-    run([python, "scripts/build_prototypes.py", "--emb", str(emb_path), "--meta", str(meta_path), "--out", str(protos_path)])
+    run([python, "scripts/compute_histograms.py", "--meta", str(meta_path), "--out", str(hist_path), "--images-root", str(subset)])
+    run([python, "scripts/build_prototypes.py", "--emb", str(emb_path), "--meta", str(meta_path), "--cells", str(cells_path), "--image-histograms", str(hist_path), "--out", str(protos_path)])
 
+    import numpy as np
     import pandas as pd
     from PIL import Image
 
+    from src.ocr import ScriptDetector
     from src.pipeline import predict
 
+    # 1. Pipeline smoke (CLIP-only path — skip OCR to keep the smoke run fast,
+    # but exercise the color-hist path since it's cheap.)
     meta = pd.read_parquet(meta_path)
     val = meta[meta["split"] == "val"].head(1)
     if len(val) == 0:
@@ -53,11 +59,44 @@ def main() -> None:
         prototypes_path=str(protos_path),
         top_cells=3,
         top_k=3,
+        enable_ocr=False,
+        enable_color=True,
+        gamma=0.3,
     )
     print("[smoke] result:", result["predicted"], "conf", result["confidence"])
     assert -90 <= result["predicted"][0] <= 90, result
     assert -180 <= result["predicted"][1] <= 180, result
     assert len(result["top_k"]) > 0
+    assert result["ocr_enabled"] is False
+    assert result["detected_scripts"] is None
+    assert result["color_enabled"] is True, result
+    assert result["top_k"][0]["color_sim"] is not None, result["top_k"][0]
+
+    # 2. Prototype country + hist columns populated
+    protos = np.load(protos_path)
+    assert "country" in protos.files, "prototypes.npz missing 'country' column"
+    assert "hist" in protos.files, "prototypes.npz missing 'hist' column"
+    assert "hist_bins" in protos.files and "hist_grid" in protos.files
+    print(
+        f"[smoke] prototypes: country n={len(protos['country'])}, "
+        f"hist shape={protos['hist'].shape}, bins={protos['hist_bins'].tolist()}, "
+        f"grid={int(protos['hist_grid'][0])}"
+    )
+
+    # 3. Per-image histogram cache is aligned with meta
+    image_hists = np.load(hist_path)
+    assert len(image_hists) == len(meta), (len(image_hists), len(meta))
+    assert image_hists.shape[1] == protos["hist"].shape[1]
+    print(f"[smoke] image_histograms shape={image_hists.shape}")
+
+    # 4. OCR schema smoke (single image; verifies easyocr import + detect shape)
+    detector = ScriptDetector.get()
+    det = detector.detect(img)
+    assert set(det.keys()) == {"scripts", "text", "dominant"}, det.keys()
+    assert isinstance(det["scripts"], dict)
+    assert isinstance(det["text"], list)
+    print(f"[smoke] OCR schema OK; dominant={det['dominant']} scripts={det['scripts']}")
+
     print("[smoke] OK")
 
 
