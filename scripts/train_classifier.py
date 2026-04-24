@@ -29,7 +29,7 @@ def main() -> None:
     parser.add_argument("--meta", type=str, required=True)
     parser.add_argument("--cells", type=str, required=True)
     parser.add_argument("--out", type=str, default="data/classifier.pt")
-    parser.add_argument("--curves", type=str, default="data/curves.png")
+    parser.add_argument("--curves", type=str, default="results/curves.png")
     parser.add_argument("--epochs", type=int, default=20)
     parser.add_argument("--batch-size", type=int, default=512)
     parser.add_argument("--lr", type=float, default=1e-3)

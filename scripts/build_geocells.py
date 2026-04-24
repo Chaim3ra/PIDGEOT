@@ -17,6 +17,12 @@ def main() -> None:
     parser = argparse.ArgumentParser(description="Build semantic geocells from admin labels")
     parser.add_argument("--meta", type=str, required=True, help="metadata.csv from download_osv5m")
     parser.add_argument("--out", type=str, default="data/geocells/cells.pkl")
+    parser.add_argument(
+        "--results-dir",
+        type=str,
+        default="results/geocells",
+        help="Directory for committed diagnostic charts (size histogram, centroid map).",
+    )
     parser.add_argument("--min-samples", type=int, default=30)
     parser.add_argument(
         "--country-col",
@@ -48,14 +54,15 @@ def main() -> None:
     save_cells(cells, cell_of_index, args.out)
     print(f"[geocells] saved to {args.out}")
 
-    out_dir = Path(args.out).parent
+    results_dir = Path(args.results_dir)
+    results_dir.mkdir(parents=True, exist_ok=True)
     fig, ax = plt.subplots(figsize=(8, 4))
     ax.hist(counts, bins=50)
     ax.set_xlabel("members per cell")
     ax.set_ylabel("count")
     ax.set_title(f"Geocell size histogram (n_cells={len(cells)})")
     fig.tight_layout()
-    fig.savefig(out_dir / "cell_size_hist.png", dpi=120)
+    fig.savefig(results_dir / "cell_size_hist.png", dpi=120)
     plt.close(fig)
 
     fig, ax = plt.subplots(figsize=(10, 5))
@@ -68,8 +75,9 @@ def main() -> None:
     ax.set_ylim(-90, 90)
     ax.grid(True, alpha=0.3)
     fig.tight_layout()
-    fig.savefig(out_dir / "cell_centroids.png", dpi=120)
+    fig.savefig(results_dir / "cell_centroids.png", dpi=120)
     plt.close(fig)
+    print(f"[geocells] saved charts to {results_dir}")
 
 
 if __name__ == "__main__":

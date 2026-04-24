@@ -9,13 +9,13 @@ data/
 *.tar
 *.tar.gz
 
-# images (allow hand-written assets under docs/)
+# images (allow hand-written assets under docs/ and run outputs under results/)
 *.jpg
 *.jpeg
 *.png
 *.webp
-!docs/*.png
-!docs/*.jpg
+!docs/**
+!results/**
 
 # python / uv
 __pycache__/

@@ -1,6 +1,7 @@
 from __future__ import annotations
 
 import argparse
+import json
 import sys
 from pathlib import Path
 
@@ -25,7 +26,7 @@ def main() -> None:
     parser.add_argument("--classifier", type=str, required=True)
     parser.add_argument("--protos", type=str, required=True)
     parser.add_argument("--top-cells", type=int, default=5)
-    parser.add_argument("--out-dir", type=str, default="data")
+    parser.add_argument("--out-dir", type=str, default="results")
     args = parser.parse_args()
 
     emb = np.load(args.emb)
@@ -78,6 +79,9 @@ def main() -> None:
         pred_lons_proto[i] = proto_lon[mask][best]
     km_err_proto = haversine_km(pred_lats_proto, pred_lons_proto, lats_val, lons_val)
 
+    thresholds_km = [1, 25, 200, 750, 2500]
+    frac_within = {f"frac_within_{t}km": float((km_err_proto < t).mean()) for t in thresholds_km}
+
     print(f"[eval] val n={len(emb_val)}")
     print(f"[eval] cell top-1 {top1:.3f} | top-5 {top5:.3f}")
     print(
@@ -88,9 +92,8 @@ def main() -> None:
         f"[eval] km error (prototype refined): median {np.median(km_err_proto):.1f} "
         f"mean {np.mean(km_err_proto):.1f}"
     )
-    for thr in [1, 25, 200, 750, 2500]:
-        frac = float((km_err_proto < thr).mean())
-        print(f"[eval] frac within {thr:>5} km: {frac:.3f}")
+    for t in thresholds_km:
+        print(f"[eval] frac within {t:>5} km: {frac_within[f'frac_within_{t}km']:.3f}")
 
     out_dir = Path(args.out_dir)
     out_dir.mkdir(parents=True, exist_ok=True)
@@ -104,6 +107,21 @@ def main() -> None:
     fig.savefig(out_dir / "eval_error_map.png", dpi=120)
     plt.close(fig)
     print(f"[eval] saved {out_dir / 'eval_error_map.png'}")
+
+    metrics = {
+        "val_n": int(len(emb_val)),
+        "top_cells": int(args.top_cells),
+        "cell_top1": top1,
+        "cell_top5": top5,
+        "km_err_cell_median": float(np.median(km_err_cell)),
+        "km_err_cell_mean": float(np.mean(km_err_cell)),
+        "km_err_proto_median": float(np.median(km_err_proto)),
+        "km_err_proto_mean": float(np.mean(km_err_proto)),
+        **frac_within,
+    }
+    with open(out_dir / "eval_metrics.json", "w", encoding="utf-8") as f:
+        json.dump(metrics, f, indent=2)
+    print(f"[eval] saved {out_dir / 'eval_metrics.json'}")
 
 
 if __name__ == "__main__":
