@@ -1,4 +1,4 @@
-# PIDGEOT — Image Geolocalization
+# PIDGEOT: Adding Classical Vision To Image Geolocalization
 
 A simplified re-implementation of [PIGEON](https://arxiv.org/abs/2307.05845) (Haas et al., CVPR 2024):
 
@@ -11,7 +11,15 @@ A simplified re-implementation of [PIGEON](https://arxiv.org/abs/2307.05845) (Ha
 - **Color-histogram re-ranking** (γ term): HSV 3×3 spatial-grid histograms, intersection similarity, per-prototype mean histogram.
 - Simple **Gradio UI**: upload an image, toggle each re-rank term live, see the top-K on a Folium world map.
 
-See [docs/IMPLEMENTATION.md](docs/IMPLEMENTATION.md) for the full walkthrough of design choices.
+## Group Members
+- Chaitanya Agarwal (agarwal.cha@northeastern.edu)
+- Lohith Chamakura (chamakura.l@northeastern.edu)
+- Rishabh Kumar (kumar.rishabh@northeastern.edu)
+
+## Project Demo (Video Link)
+https://drive.google.com/file/d/1vIYBHqk_ZuBbu-4WM_Vw13ikToSVXPPK/view?usp=drive_link
+
+
 
 ## Pipeline
 
